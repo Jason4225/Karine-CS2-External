@@ -9,26 +9,16 @@ class C_BaseEntity;
 class CGameEntitySystem
 {
 private:
-	uintptr_t entityList = NULL;
-
-	void* GetNigga(int index)
-	{
-		uintptr_t listEntry = ctx::memory.Read<uintptr_t>(entityList + (0x8 * (index & 0x7FFF) >> 9) + 0x10);
-		return ctx::memory.Read<void*>(listEntry + 120 * (index & 0x1FF));
-	}
-
-	void* GetNiggaV2(int index)
-	{
-		uintptr_t listEntry = ctx::memory.Read<uintptr_t>(entityList + 0x8 * ((index & 0x7FFF) >> 9) + 0x10);
-		return ctx::memory.Read<void*>(listEntry + 120 * (index & 0x1FF));
-	}
+	// @ida: #STR: "Ent %3d: %s class %s name %s\n" ->
+	// @ida: #STR: "cl_showents" | "Dump entity list to console." -> 1st Func ->
+	// do { entity = GetBaseEntityByIndex(CGameEntitySystem, index);
+	void* GetBaseEntityByIndex(int index);
 public:
-	CGameEntitySystem();
 
 	template <typename T = C_BaseEntity>
 	T* Get(int index)
 	{
-		return reinterpret_cast<T*>(GetNigga(index));
+		return reinterpret_cast<T*>(GetBaseEntityByIndex(index));
 	}
 
 	template <typename T = C_BaseEntity>
@@ -37,6 +27,6 @@ public:
 		if (!entityHandle.IsValid())
 			return nullptr;
 
-		return reinterpret_cast<T*>(GetNiggaV2(entityHandle.GetEntryIndex()));
+		return reinterpret_cast<T*>(GetBaseEntityByIndex(entityHandle.GetEntryIndex()));
 	}
 };

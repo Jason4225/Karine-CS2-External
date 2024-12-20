@@ -18,5 +18,4 @@ namespace sdk
     inline ViewMatrix_t viewMatrix;
 
     inline std::vector<CEntity> playerList;
-    //inline std::mutex playerListMutex;
 }

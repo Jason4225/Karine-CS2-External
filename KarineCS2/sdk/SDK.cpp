@@ -4,8 +4,8 @@
 
 bool sdk::Initialize()
 {
-	clientDLL = ctx::memory.FindModule("client.dll");
-	entitySystem = new CGameEntitySystem();
+	clientDLL = ctx::memory.FindModule("client.dll"); // ctx::memory.Read<uintptr_t>(sdk::clientDLL + offsets::dwEntityList);
+	entitySystem = ctx::memory.Read<CGameEntitySystem*>(clientDLL + 0x1B37E58);
 
 	return true;
 }
