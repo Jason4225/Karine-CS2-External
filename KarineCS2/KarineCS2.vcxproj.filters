@@ -116,5 +116,8 @@
     <ClInclude Include="sdk\types\ViewMatrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sdk\classes\IGlobalVars.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

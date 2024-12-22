@@ -1,10 +1,11 @@
 #include <windows.h>
 #include <iostream>
-#include "Context.h"
 #include <SDK.h>
 #include <thread>
+#include "Context.h"
 
-void Main(HMODULE inst)
+
+int main()
 {
     ctx::memory.Initialize("cs2.exe");
     ctx::renderer.Initialize();
@@ -26,16 +27,16 @@ void Main(HMODULE inst)
             ctx::running = false;
 
         ctx::renderer.Render();
+        Sleep(1);
     }
 
     // Cleanup
     updateThread.detach();
     ctx::renderer.Destroy();
-
-    FreeLibraryAndExitThread(inst, 0);
+    //FreeLibraryAndExitThread(inst, 0);
 }
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
+/*BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 {
     if (reason == DLL_PROCESS_ATTACH)
     {
@@ -45,4 +46,4 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
     }
 
     return TRUE;
-}
+}*/

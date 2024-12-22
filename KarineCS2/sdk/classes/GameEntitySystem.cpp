@@ -9,7 +9,7 @@ void* CGameEntitySystem::GetBaseEntityByIndex(int index)
 	if ((unsigned int)((int)index >> 9) > 0x3F)
 		return nullptr;
 
-	void* v2 = ctx::memory.Read<void*>(reinterpret_cast<uintptr_t>(this) + 0x8 * (index >> 9) + 0x10);
+	void* v2 = ctx::memory.Read<void*>(reinterpret_cast<uintptr_t>(this) + 8 * (index >> 9) + 16);
 	if (!v2)
 		return nullptr; 
 

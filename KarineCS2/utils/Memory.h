@@ -19,7 +19,14 @@ typedef struct _SYSTEM_HANDLE_INFORMATION {
 	SYSTEM_HANDLE Handles[1];
 } SYSTEM_HANDLE_INFORMATION, * PSYSTEM_HANDLE_INFORMATION;
 
-typedef NTSTATUS(WINAPI* ZwQuerySystemInformation_t)(ULONG SystemInformationClass, PVOID SystemInformation, ULONG SystemInformationLength, PULONG ReturnLength);
+typedef NTSTATUS(WINAPI* fZwQuerySystemInformation)(ULONG SystemInformationClass, PVOID SystemInformation, ULONG SystemInformationLength, PULONG ReturnLength);
+typedef NTSTATUS(NTAPI* fRtlAdjustPrivilege)(ULONG Privilege, BOOLEAN Enable, BOOLEAN CurrentThread, PBOOLEAN Enabled);
+
+struct Signature_t
+{
+	const char* sig;
+	const char* mask;
+};
 
 class CMemory
 {
@@ -55,9 +62,18 @@ public:
 		if (processId == NULL)
 			return false;
 
-		ZwQuerySystemInformation_t ZwQuerySystemInformation = (ZwQuerySystemInformation_t)GetProcAddress(GetModuleHandleA("ntdll.dll"), "ZwQuerySystemInformation");
+		/*HMODULE ntDll = GetModuleHandleA("ntdll.dll");
+
+		fZwQuerySystemInformation ZwQuerySystemInformation = (fZwQuerySystemInformation)GetProcAddress(ntDll, "ZwQuerySystemInformation");
 		if (ZwQuerySystemInformation == nullptr)
 			return false;
+
+		fRtlAdjustPrivilege RtlAdjustPrivilege = (fRtlAdjustPrivilege)GetProcAddress(ntDll, "RtlAdjustPrivilege");
+		if (RtlAdjustPrivilege == nullptr)
+			return false;
+
+		BOOLEAN oldPriv;
+		RtlAdjustPrivilege(20, TRUE, FALSE, &oldPriv); // Debug Privilege
 
 		std::vector<BYTE> buffer(0x10000);
 		
@@ -74,19 +90,21 @@ public:
 		DWORD currentProcessId = GetCurrentProcessId();
 
 		for (ULONG i = 0; i < handleInfo->HandleCount; i++) {
-			const SYSTEM_HANDLE& handle = handleInfo->Handles[i];
+			const SYSTEM_HANDLE& sysHandle = handleInfo->Handles[i];
 
-			if (handle.ProcessId == currentProcessId) {
-				if ((int)handle.ObjectTypeNumber == 0x7)
+			if (sysHandle.ProcessId == currentProcessId) {
+				if ((int)sysHandle.ObjectTypeNumber == 0x7)
 				{
-					if (GetProcessId((HANDLE)handle.Handle) == processId)
+					if (GetProcessId((HANDLE)sysHandle.Handle) == processId)
 					{
-						targetHandle = (HANDLE)handle.Handle;
+						targetHandle = (HANDLE)sysHandle.Handle;
 						return true;
 					}
 				}
 			}
-		}
+		}*/
+
+		targetHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processId);
 
 		return false;
 	}
@@ -126,8 +144,49 @@ public:
 		return ReadProcessMemory(targetHandle, (void*)address, buffer, size, 0);
 	}
 
+	uintptr_t ResolveRVA(uintptr_t address, uint32_t rvaOffset, uint32_t ripOffset) 
+	{
+		const uintptr_t rva = *reinterpret_cast<PLONG>(address + rvaOffset);
+		const uintptr_t rip = address + ripOffset;
+
+		return rva + rip;
+	}
+
+	uintptr_t FindSig(Signature_t signature, uintptr_t base, size_t size)
+	{
+		for (BYTE* region = reinterpret_cast<BYTE*>(base); region < (reinterpret_cast<BYTE*>(base) + size); ++region)
+		{
+			if (*region == *signature.sig)
+			{
+				const unsigned char* patternIt = reinterpret_cast<const BYTE*>(signature.sig), * maskIt = reinterpret_cast<const BYTE*>(signature.mask), * memoryIt = region;
+
+				bool found = true;
+
+				for (; *maskIt && (memoryIt < (reinterpret_cast<BYTE*>(base) + size)); ++maskIt, ++patternIt, ++memoryIt)
+				{
+					if (*maskIt != 'x') continue;
+					if (*memoryIt != *patternIt)
+					{
+						found = false;
+						break;
+					}
+				}
+
+				if (found) 
+					return reinterpret_cast<std::uintptr_t>(region);
+			}
+		}
+
+		return NULL;
+	}
+
 	constexpr const DWORD GetPid() noexcept
 	{
 		return processId;
+	}
+
+	constexpr const HANDLE GetHandle() noexcept
+	{
+		return targetHandle;
 	}
 };

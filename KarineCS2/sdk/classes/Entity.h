@@ -91,7 +91,6 @@ public:
 	{
 		return ctx::memory.Read<EntitySpottedState_t>((uintptr_t)this + offsets::m_entitySpottedState);
 	}
-	// client::EntitySpottedState_t m_entitySpottedState;
 	// bool m_bIsScoped;
 	// bool m_bIsDefusing
 };

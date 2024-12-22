@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <random>
+#include <chrono>
 
 namespace utils
 {
@@ -23,3 +24,25 @@ namespace utils
 		return result;
 	}
 }
+
+class CTimer
+{
+public:
+	CTimer()
+	{
+		Reset();
+	}
+
+	void Reset()
+	{
+		lastMS = std::chrono::high_resolution_clock::now();
+	}
+
+	bool HasElapsed(std::chrono::milliseconds ms) const
+	{
+		return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - lastMS) >= ms;
+	}
+
+private:
+	std::chrono::high_resolution_clock::time_point lastMS = { };
+};
