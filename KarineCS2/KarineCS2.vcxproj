@@ -163,7 +163,6 @@
     <ClCompile Include="dependencies\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="dependencies\imgui\imgui_tables.cpp" />
     <ClCompile Include="dependencies\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="features\Visuals.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="sdk\classes\GameEntitySystem.cpp" />
     <ClCompile Include="sdk\SDK.cpp" />
@@ -180,7 +179,6 @@
     <ClInclude Include="dependencies\imgui\imstb_rectpack.h" />
     <ClInclude Include="dependencies\imgui\imstb_textedit.h" />
     <ClInclude Include="dependencies\imgui\imstb_truetype.h" />
-    <ClInclude Include="features\Visuals.h" />
     <ClInclude Include="sdk\classes\IGlobalVars.h" />
     <ClInclude Include="sdk\types\ViewMatrix.h" />
     <ClInclude Include="utils\Gui.h" />

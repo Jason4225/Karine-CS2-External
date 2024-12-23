@@ -48,9 +48,6 @@
     <ClCompile Include="utils\Gui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="features\Visuals.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="utils\Memory.h">
@@ -105,9 +102,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="utils\Gui.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="features\Visuals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sdk\types\Vector.h">

@@ -18,10 +18,13 @@ bool sdk::Initialize()
 	PIMAGE_NT_HEADERS ntHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>(reinterpret_cast<std::uint8_t*>(client) + reinterpret_cast<PIMAGE_DOS_HEADER>(client)->e_lfanew);
 
 	// @ida: #STR: "gpGlocals->curtime() called while IsInSimulation() is false\n" | "gpGlocals->rendertime() called while IsInSimulation() is true\n" -> xref func -> off_????? = a2
-	offsets::dwGlobalVars = ctx::memory.ResolveRVA(ctx::memory.FindSig({ "\x48\x89\x15\x00\x00\x00\x00\x48\x89\x42", "xxx????xxx" }, (uintptr_t)client, ntHeaders->OptionalHeader.SizeOfImage), 0x3, 0x7) - (uintptr_t)client;
+	offsets::dwGlobalVars = ctx::memory.ResolveRVA(ctx::memory.FindSig({ "\x48\x89\x15\x00\x00\x00\x00\x48\x89\x42", "xxx????xxx" }, client, ntHeaders->OptionalHeader.SizeOfImage), 0x3, 0x7) - client;
 	
 	// @ida: #STR: "client_entities" -> one down -> v3 = qword_181B0CCF8;
-	offsets::dwGameEntitySystem = ctx::memory.ResolveRVA(ctx::memory.FindSig({ "\x48\x8B\x1D\x00\x00\x00\x00\x48\x89\x1D", "xxx????xxx" }, (uintptr_t)client, ntHeaders->OptionalHeader.SizeOfImage), 0x3, 0x7) - (uintptr_t)client;
+	offsets::dwGameEntitySystem = ctx::memory.ResolveRVA(ctx::memory.FindSig({ "\x48\x8B\x1D\x00\x00\x00\x00\x48\x89\x1D", "xxx????xxx" }, client, ntHeaders->OptionalHeader.SizeOfImage), 0x3, 0x7) - client;
+
+	// @ida: CViewRender -> OnRenderStart idx 5 (contains str "C:\\buildworker\\csgo_rel_win64\\build\\src\\game\\client\\view.cpp") -> GetMatricesForView second last param
+	offsets::dwViewMatrix = ctx::memory.ResolveRVA(ctx::memory.FindSig({ "\x48\x8D\x0D\x00\x00\x00\x00\x48\x89\x44\x24\x00\x48\x89\x4C\x24\x00\x4C\x8D\x0D", "xxx????xxxx?xxxx?xxx" }, client, ntHeaders->OptionalHeader.SizeOfImage), 0x3, 0x7) - client;
 
 	FreeLibrary((HMODULE)client);
 
@@ -44,6 +47,12 @@ void sdk::Update()
 			timer.Reset();
 		}
 
+		C_CSPlayerPawn* localPawn = ctx::memory.Read<C_CSPlayerPawn*>(clientDLL + 0x1A64E80);
+		localEntity.m_iHealth = localPawn->GetHealth();
+		localEntity.m_entitySpottedState = localPawn->GetSpottedState();
+		localEntity.m_vOldOrigin = localPawn->GetOldOrigin();
+		localEntity.m_iTeamNum = localPawn->GetTeamNum();
+
 		for (int i = 0; i < globalVars.m_nMaxClients; ++i)
 		{
 			CCSPlayerController* baseEntity = entitySystem->Get<CCSPlayerController>(i);
@@ -60,6 +69,7 @@ void sdk::Update()
 			entity.m_iHealth = pawn->GetHealth();
 			entity.m_entitySpottedState = pawn->GetSpottedState();
 			entity.m_vOldOrigin = pawn->GetOldOrigin();
+			entity.m_iTeamNum = pawn->GetTeamNum();
 			
 			entities.push_back(entity);
 		}

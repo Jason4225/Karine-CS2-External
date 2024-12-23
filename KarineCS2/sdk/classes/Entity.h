@@ -36,10 +36,14 @@ class C_BaseEntity : public CEntityInstance
 {
 public:
 	// client::CGameSceneNode* m_pGameSceneNode
-	// uint8_t m_iTeamNum
 	// uint32_t m_fFlags
 	// Vector m_vecAbsVelocity
-	
+
+	uint8_t GetTeamNum()
+	{
+		return ctx::memory.Read<uint8_t>((uintptr_t)this + offsets::m_iTeamNum);
+	}
+
 	int GetHealth()
 	{
 		return ctx::memory.Read<int>((uintptr_t)this + offsets::m_iHealth);
@@ -101,4 +105,5 @@ public:
 	int m_iHealth;
 	EntitySpottedState_t m_entitySpottedState;
 	Vector3_t m_vOldOrigin;
+	uint8_t m_iTeamNum;
 };

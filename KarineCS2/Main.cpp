@@ -3,7 +3,7 @@
 #include <SDK.h>
 #include <thread>
 #include "Context.h"
-
+#include <Gui.h>
 
 int main()
 {
@@ -25,6 +25,9 @@ int main()
     {
         if (GetAsyncKeyState(VK_END))
             ctx::running = false;
+
+        if (GetAsyncKeyState(VK_INSERT) & 0x0001)
+            gui::open = !gui::open;
 
         ctx::renderer.Render();
         Sleep(1);

@@ -18,6 +18,7 @@ namespace sdk
     inline CGameEntitySystem* entitySystem;
     inline IGlobalVars globalVars;
     inline ViewMatrix_t viewMatrix;
+    inline CEntity localEntity;
 
     inline std::vector<CEntity> playerList;
 }
