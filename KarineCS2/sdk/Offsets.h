@@ -9,6 +9,7 @@ namespace offsets
 	inline std::ptrdiff_t m_entitySpottedState;
 	inline std::ptrdiff_t m_vOldOrigin;
 	inline std::ptrdiff_t m_iTeamNum;
+	inline std::ptrdiff_t m_nTickBase;
 
 	inline std::ptrdiff_t dwGlobalVars;
 	inline std::ptrdiff_t dwGameEntitySystem;

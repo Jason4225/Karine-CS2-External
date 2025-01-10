@@ -30,3 +30,5 @@ namespace fnv1a
         return (str[0] == '\0') ? value : HashConst(&str[1], (value ^ uint64_t((uint8_t)str[0])) * prime_64_const);
     }
 }
+
+#define HASH(str) fnv1a::HashConst(str)

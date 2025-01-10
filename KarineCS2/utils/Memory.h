@@ -38,6 +38,8 @@ private:
 		return NULL;
 	}
 public:
+	int reads = 0;
+
 	bool Initialize(const char* procName) noexcept
 	{
 		processId = FindProcessId(procName);
@@ -74,6 +76,8 @@ public:
 	template<typename T = void*>
 	T Read(uintptr_t address)
 	{
+		reads += 1;
+
 		T buffer{ };
 		ReadProcessMemory(targetHandle, (void*)address, &buffer, sizeof(T), 0);
 		return buffer;
@@ -81,6 +85,7 @@ public:
 
 	bool ReadRaw(uintptr_t address, void* buffer, size_t size)
 	{
+		reads += 1;
 		return ReadProcessMemory(targetHandle, (void*)address, buffer, size, 0);
 	}
 

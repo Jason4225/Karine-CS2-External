@@ -136,16 +136,13 @@ void CRenderer::Render()
     ImDrawList* pBackgroundDrawList = ImGui::GetBackgroundDrawList();
     
     // P100 esp
-    if (gui::esp)
+    for (CEntity entity : sdk::playerList)
     {
-        for (CEntity entity : sdk::playerList)
-        {
-            if (entity.m_iTeamNum == sdk::localEntity.m_iTeamNum) // Team check
-                continue;
+        if (entity.m_iTeamNum == sdk::localEntity.m_iTeamNum)
+            continue;
 
-            Vector3_t www = w2s(sdk::viewMatrix, entity.m_vOldOrigin);
-            pBackgroundDrawList->AddText({ www.x, www.y }, ImColor(255, 0, 0), "Player");
-        }
+        Vector3_t www = w2s(sdk::viewMatrix, entity.m_vOldOrigin);
+        pBackgroundDrawList->AddText({ www.x, www.y }, ImColor(255, 0, 0), "Player");
     }
 
     ImGui::Render();

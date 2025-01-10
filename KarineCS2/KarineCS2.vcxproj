@@ -123,7 +123,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(DXSDK_DIR)\Include;$(ProjectDir)utils;$(ProjectDir)dependencies;$(ProjectDir)sdk;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)\Include;$(ProjectDir)utils;$(ProjectDir)dependencies;$(ProjectDir)sdk;$(ProjectDir)features;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -163,6 +163,7 @@
     <ClCompile Include="dependencies\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="dependencies\imgui\imgui_tables.cpp" />
     <ClCompile Include="dependencies\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="features\Visuals.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="sdk\classes\GameEntitySystem.cpp" />
     <ClCompile Include="sdk\Schema.cpp" />
@@ -180,6 +181,7 @@
     <ClInclude Include="dependencies\imgui\imstb_rectpack.h" />
     <ClInclude Include="dependencies\imgui\imstb_textedit.h" />
     <ClInclude Include="dependencies\imgui\imstb_truetype.h" />
+    <ClInclude Include="features\Features.h" />
     <ClInclude Include="sdk\classes\IGlobalVars.h" />
     <ClInclude Include="sdk\classes\ISchemaSystem.h" />
     <ClInclude Include="sdk\Schema.h" />

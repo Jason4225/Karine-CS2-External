@@ -1,8 +1,13 @@
 #pragma once
 #include "../../Context.h"
 #include "../Offsets.h"
+
 #include "../types/Handle.h"
 #include "../types/Vector.h"
+
+#include "../Schema.h"
+
+#include <FNV1A.h>
 
 // https://github.com/perilouswithadollarsign/cstrike15_src
 // https://github.com/neverlosecc/source2sdk/blob/cs2/sdk/client.hpp
@@ -54,11 +59,22 @@ class C_CSPlayerPawn;
 class CBasePlayerController : public C_BaseEntity
 {
 public:
-	// uint32_t m_nTickBase
+	uint32_t GetTickBase()
+	{
+		return ctx::memory.Read<uint32_t>((uintptr_t)this + schemaSystem::GetOffset(HASH("CBasePlayerController->m_nTickBase")));
+	}
 	
 	CBaseHandle GetPawnHandle()
 	{
 		return ctx::memory.Read<CBaseHandle>((uintptr_t)this + offsets::m_hPawn);
+	}
+
+	/*
+	* Not used its more efficient to use offsets for localplayer.
+	*/
+	bool IsLocalPlayerController()
+	{
+		return ctx::memory.Read<bool>((uintptr_t)this + schemaSystem::GetOffset(HASH("CBasePlayerController->m_bIsLocalPlayerController")));
 	}
 };
 
@@ -106,4 +122,5 @@ public:
 	EntitySpottedState_t m_entitySpottedState;
 	Vector3_t m_vOldOrigin;
 	uint8_t m_iTeamNum;
+	uint32_t m_nTickBase;
 };

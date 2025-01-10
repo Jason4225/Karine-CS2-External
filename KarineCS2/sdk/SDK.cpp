@@ -7,6 +7,7 @@
 #include <FNV1A.h>
 
 inline static CTimer timer;
+inline static CTimer readTimer;
 
 bool sdk::Initialize()
 {
@@ -57,9 +58,12 @@ bool sdk::Initialize()
 	offsets::m_iHealth				= schemaSystem::GetOffset(fnv1a::HashConst("C_BaseEntity->m_iHealth"));
 	offsets::m_iTeamNum				= schemaSystem::GetOffset(fnv1a::HashConst("C_BaseEntity->m_iTeamNum"));
 	offsets::m_vOldOrigin			= schemaSystem::GetOffset(fnv1a::HashConst("C_BasePlayerPawn->m_vOldOrigin"));
+	//offsets::m_nTickBase			= schemaSystem::GetOffset(fnv1a::HashConst("CBasePlayerController->m_nTickBase"));
 
 	return true;
 }
+
+uint32_t prevTick = 0;
 
 void sdk::Update()
 {
@@ -77,20 +81,22 @@ void sdk::Update()
 			timer.Reset();
 		}
 
-		// TODO: make update only on tick change
-
 		CCSPlayerController* localCont = ctx::memory.Read<CCSPlayerController*>(clientDLL + offsets::dwLocalPlayerController);
-		C_CSPlayerPawn* localPawn = entitySystem->Get<C_CSPlayerPawn>(localCont->GetPawnHandle());
+		C_CSPlayerPawn* localPawn = entitySystem->Get<C_CSPlayerPawn>(localCont->GetPawnHandle()); // Maybe search directly for pawn to save reads
 
 		localEntity.m_iHealth = localPawn->GetHealth();
 		localEntity.m_entitySpottedState = localPawn->GetSpottedState();
 		localEntity.m_vOldOrigin = localPawn->GetOldOrigin();
 		localEntity.m_iTeamNum = localPawn->GetTeamNum();
+		//localEntity.m_nTickBase = localCont->GetTickBase();
 
 		for (int i = 0; i < globalVars.m_nMaxClients; ++i)
 		{
 			CCSPlayerController* baseEntity = entitySystem->Get<CCSPlayerController>(i);
 			if (!baseEntity)
+				continue;
+
+			if (localCont == baseEntity)
 				continue;
 
 			if (!baseEntity->IsPawnAlive())
@@ -104,9 +110,12 @@ void sdk::Update()
 			entity.m_entitySpottedState = pawn->GetSpottedState();
 			entity.m_vOldOrigin = pawn->GetOldOrigin();
 			entity.m_iTeamNum = pawn->GetTeamNum();
-			
+
 			entities.push_back(entity);
 		}
+
+		printf("RPS: %i\n", ctx::memory.reads);
+		ctx::memory.reads = 0;
 
 		playerList.clear();
 		playerList.assign(entities.begin(), entities.end());
