@@ -20,6 +20,8 @@
 
 LRESULT WINAPI WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
+// TODO: No support for fullscren, maybe later z-order? -> https://blog.adeltax.com/window-z-order-in-windows-10/
+
 bool CRenderer::Initialize()
 {
     std::string name = utils::RandomString(15);
@@ -129,11 +131,11 @@ void CRenderer::Render()
         ChangeClickability(false);
     }
 
-    ImGui::GetBackgroundDrawList()->AddText({ 10, 10 }, ImColor(255, 0, 0), "Ritter88");
+    ImGui::GetBackgroundDrawList()->AddText({ 10, 10 }, ImColor(255, 0, 0), std::string("Shitware 1337 | FPS: " + std::to_string(ImGui::GetIO().Framerate)).c_str());
 
     ImDrawList* pBackgroundDrawList = ImGui::GetBackgroundDrawList();
     
-    // ESP
+    // P100 esp
     if (gui::esp)
     {
         for (CEntity entity : sdk::playerList)

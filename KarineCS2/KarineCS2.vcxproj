@@ -165,6 +165,7 @@
     <ClCompile Include="dependencies\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="sdk\classes\GameEntitySystem.cpp" />
+    <ClCompile Include="sdk\Schema.cpp" />
     <ClCompile Include="sdk\SDK.cpp" />
     <ClCompile Include="utils\Gui.cpp" />
     <ClCompile Include="utils\Renderer.cpp" />
@@ -180,7 +181,11 @@
     <ClInclude Include="dependencies\imgui\imstb_textedit.h" />
     <ClInclude Include="dependencies\imgui\imstb_truetype.h" />
     <ClInclude Include="sdk\classes\IGlobalVars.h" />
+    <ClInclude Include="sdk\classes\ISchemaSystem.h" />
+    <ClInclude Include="sdk\Schema.h" />
+    <ClInclude Include="sdk\types\CUtlHash.h" />
     <ClInclude Include="sdk\types\ViewMatrix.h" />
+    <ClInclude Include="utils\FNV1A.h" />
     <ClInclude Include="utils\Gui.h" />
     <ClInclude Include="sdk\classes\GameEntitySystem.h" />
     <ClInclude Include="sdk\SDK.h" />

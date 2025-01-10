@@ -5,22 +5,12 @@
 #include "Context.h"
 #include <Gui.h>
 
-int main()
+/*
+* Handle keybinds
+* TODO: add keybinding
+*/
+void KeyHandling()
 {
-    ctx::memory.Initialize("cs2.exe");
-    ctx::renderer.Initialize();
-    sdk::Initialize();
-
-    /*
-    * 
-    * Update thread - every tick (update player data)
-    * Render thread - (render everything)
-    * 
-    */
-
-    std::thread updateThread(sdk::Update);
-
-    // Main loop / render thread
     while (ctx::running)
     {
         if (GetAsyncKeyState(VK_END))
@@ -29,24 +19,39 @@ int main()
         if (GetAsyncKeyState(VK_INSERT) & 0x0001)
             gui::open = !gui::open;
 
+        Sleep(100);
+    }
+}
+
+int main()
+{
+    // Set to highest priority.
+    SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
+
+    ctx::memory.Initialize("cs2.exe");
+    ctx::renderer.Initialize();
+    sdk::Initialize();
+
+    /*
+    * 
+    * Update thread         - every tick (update player data)
+    * Render thread         - render everything
+    * KeyHandling thread    - check for keypresses
+    * 
+    */
+
+    std::thread updateThread(sdk::Update);
+    std::thread keyHandlingThread(KeyHandling);
+
+    // Main loop / render thread
+    while (ctx::running)
+    {  
         ctx::renderer.Render();
         Sleep(1);
     }
 
     // Cleanup
     updateThread.detach();
+    keyHandlingThread.detach();
     ctx::renderer.Destroy();
-    //FreeLibraryAndExitThread(inst, 0);
 }
-
-/*BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
-{
-    if (reason == DLL_PROCESS_ATTACH)
-    {
-        DisableThreadLibraryCalls(hModule);
-        if (HANDLE thread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)Main, hModule, 0, 0); thread != nullptr)
-            CloseHandle(thread);
-    }
-
-    return TRUE;
-}*/

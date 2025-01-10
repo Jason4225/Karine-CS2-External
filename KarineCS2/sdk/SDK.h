@@ -14,6 +14,8 @@ namespace sdk
     void Update();
 
     inline uintptr_t clientDLL = NULL;
+    inline uintptr_t schemaSystemDLL = NULL;
+    inline uintptr_t engineDLL = NULL;
 
     inline CGameEntitySystem* entitySystem;
     inline IGlobalVars globalVars;

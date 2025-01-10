@@ -2,25 +2,7 @@
 #include <Windows.h>
 #include <TlHelp32.h>
 #include <vector>
-
-#define STATUS_INFO_LENGTH_MISMATCH 0xC0000004
-
-typedef struct _SYSTEM_HANDLE {
-	ULONG ProcessId;
-	UCHAR ObjectTypeNumber;
-	UCHAR Flags;
-	USHORT Handle;
-	PVOID Object;
-	ACCESS_MASK GrantedAccess;
-} SYSTEM_HANDLE, * PSYSTEM_HANDLE;
-
-typedef struct _SYSTEM_HANDLE_INFORMATION {
-	ULONG HandleCount;
-	SYSTEM_HANDLE Handles[1];
-} SYSTEM_HANDLE_INFORMATION, * PSYSTEM_HANDLE_INFORMATION;
-
-typedef NTSTATUS(WINAPI* fZwQuerySystemInformation)(ULONG SystemInformationClass, PVOID SystemInformation, ULONG SystemInformationLength, PULONG ReturnLength);
-typedef NTSTATUS(NTAPI* fRtlAdjustPrivilege)(ULONG Privilege, BOOLEAN Enable, BOOLEAN CurrentThread, PBOOLEAN Enabled);
+#include <string>
 
 struct Signature_t
 {
@@ -62,48 +44,6 @@ public:
 		if (processId == NULL)
 			return false;
 
-		/*HMODULE ntDll = GetModuleHandleA("ntdll.dll");
-
-		fZwQuerySystemInformation ZwQuerySystemInformation = (fZwQuerySystemInformation)GetProcAddress(ntDll, "ZwQuerySystemInformation");
-		if (ZwQuerySystemInformation == nullptr)
-			return false;
-
-		fRtlAdjustPrivilege RtlAdjustPrivilege = (fRtlAdjustPrivilege)GetProcAddress(ntDll, "RtlAdjustPrivilege");
-		if (RtlAdjustPrivilege == nullptr)
-			return false;
-
-		BOOLEAN oldPriv;
-		RtlAdjustPrivilege(20, TRUE, FALSE, &oldPriv); // Debug Privilege
-
-		std::vector<BYTE> buffer(0x10000);
-		
-		ULONG returnLength = 0;
-		NTSTATUS status = ZwQuerySystemInformation(16, buffer.data(), buffer.size(), &returnLength);
-
-		if (status == STATUS_INFO_LENGTH_MISMATCH)
-		{
-			buffer.resize(returnLength);
-			status = ZwQuerySystemInformation(16, buffer.data(), buffer.size(), &returnLength);
-		}
-
-		PSYSTEM_HANDLE_INFORMATION handleInfo = reinterpret_cast<PSYSTEM_HANDLE_INFORMATION>(buffer.data());
-		DWORD currentProcessId = GetCurrentProcessId();
-
-		for (ULONG i = 0; i < handleInfo->HandleCount; i++) {
-			const SYSTEM_HANDLE& sysHandle = handleInfo->Handles[i];
-
-			if (sysHandle.ProcessId == currentProcessId) {
-				if ((int)sysHandle.ObjectTypeNumber == 0x7)
-				{
-					if (GetProcessId((HANDLE)sysHandle.Handle) == processId)
-					{
-						targetHandle = (HANDLE)sysHandle.Handle;
-						return true;
-					}
-				}
-			}
-		}*/
-
 		targetHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processId);
 
 		return false;
@@ -142,6 +82,13 @@ public:
 	bool ReadRaw(uintptr_t address, void* buffer, size_t size)
 	{
 		return ReadProcessMemory(targetHandle, (void*)address, buffer, size, 0);
+	}
+
+	const std::string ReadString(uintptr_t dst)
+	{
+		char buf[MAX_PATH] = {};
+		ReadRaw(dst, &buf, sizeof(buf));
+		return std::string(buf);
 	}
 
 	uintptr_t ResolveRVA(uintptr_t address, uint32_t rvaOffset, uint32_t ripOffset) 

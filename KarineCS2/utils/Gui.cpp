@@ -3,7 +3,7 @@
 
 void gui::Render()
 {
-	ImGui::Begin("Ritter88", &open);
+	ImGui::Begin("Shitware 1337", &open);
 	{
 		ImGui::Checkbox("ESP", &esp);
 		ImGui::End();
