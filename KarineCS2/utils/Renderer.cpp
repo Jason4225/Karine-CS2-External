@@ -18,6 +18,8 @@
 #include <types/Vector.h>
 #include <types/ViewMatrix.h>
 
+#include <Config.h>
+
 LRESULT WINAPI WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 // TODO: No support for fullscren, maybe later z-order? -> https://blog.adeltax.com/window-z-order-in-windows-10/
@@ -136,13 +138,16 @@ void CRenderer::Render()
     ImDrawList* pBackgroundDrawList = ImGui::GetBackgroundDrawList();
     
     // P100 esp
-    for (CEntity entity : sdk::playerList)
+    if (vars::esp)
     {
-        if (entity.m_iTeamNum == sdk::localEntity.m_iTeamNum)
-            continue;
+        for (CEntity entity : sdk::playerList)
+        {
+            if (entity.m_iTeamNum == sdk::localEntity.m_iTeamNum)
+                continue;
 
-        Vector3_t www = w2s(sdk::viewMatrix, entity.m_vOldOrigin);
-        pBackgroundDrawList->AddText({ www.x, www.y }, ImColor(255, 0, 0), "Player");
+            Vector3_t www = w2s(sdk::viewMatrix, entity.m_vOldOrigin);
+            pBackgroundDrawList->AddText({ www.x, www.y }, ImColor(255, 0, 0), "Player");
+        }
     }
 
     ImGui::Render();

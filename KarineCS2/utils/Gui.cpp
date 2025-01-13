@@ -1,6 +1,7 @@
 #include "Gui.h"
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
+#include <Config.h>
 
 void gui::DrawAim()
 {
@@ -58,7 +59,59 @@ void gui::DrawMisc()
 
     if (miscTab == 0)
     {
+        ImGui::SetCursorPosY(70);
+        ImGui::SetCursorPosX(60);
+        ImGui::BeginListBox("##configs", { 100, 100 });
+        {
+            for (int i = 0; i < config.configs.size(); ++i)
+            {
+                if (ImGui::Selectable(config.configs[i].c_str()))
+                {
+                    config.currentConfig = i;
+                    ImGui::OpenPopup("config options");
+                }
+            }
 
+            if (ImGui::BeginPopup(("config options")))
+            {
+                if (ImGui::Button("Load", { 100, 25 }))
+                {
+                    config.Load(config.currentConfig);
+                    ImGui::CloseCurrentPopup();
+                }
+
+                if (ImGui::Button("Save", { 100, 25 }))
+                {
+                    config.Save(config.currentConfig);
+                    ImGui::CloseCurrentPopup();
+                }
+
+                if (ImGui::Button("Delete", { 100, 25 }))
+                {
+                    config.Delete(config.currentConfig);
+                    ImGui::CloseCurrentPopup();
+                }
+
+                ImGui::EndPopup();
+            }
+
+            ImGui::EndListBox();
+        }
+
+        ImGui::SetCursorPosX(60);
+        ImGui::InputText("##name", config.currentConfigName, sizeof(config.currentConfigName));
+
+        ImGui::SetCursorPosX(60);
+        if (ImGui::Button("Create", { 100, 25 }))
+        {
+            config.Create(config.currentConfigName);
+        }
+
+        ImGui::SetCursorPosX(60);
+        if (ImGui::Button("Refresh", { 100, 25 }))
+        {
+            config.RefreshConfigs();
+        }
     }
     else if (miscTab == 1)
     {
@@ -90,7 +143,9 @@ void gui::DrawVisuals()
 
     if (miscTab == 0)
     {
-
+        ImGui::SetCursorPosY(70);
+        ImGui::SetCursorPosX(60);
+        ImGui::Checkbox("Esp", &vars::esp);
     }
     else if (miscTab == 1)
     {

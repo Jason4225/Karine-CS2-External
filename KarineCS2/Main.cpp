@@ -4,6 +4,7 @@
 #include <thread>
 #include "Context.h"
 #include <Gui.h>
+#include <Config.h>
 
 /*
 * Handle keybinds
@@ -27,6 +28,11 @@ int main()
 {
     // Set to highest priority.
     SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
+
+    // Create Cfg dir
+    CreateDirectoryA(CONFIG_PATH, NULL);
+    // Load the cfgs
+    config.RefreshConfigs();
 
     ctx::memory.Initialize("cs2.exe");
     ctx::renderer.Initialize();
