@@ -23,4 +23,6 @@ namespace sdk
     inline CEntity localEntity;
 
     inline std::vector<CEntity> playerList;
+
+    inline std::mutex entityMutex;
 }

@@ -19,6 +19,7 @@
 #include <types/ViewMatrix.h>
 
 #include <Config.h>
+#include <Features.h>
 
 LRESULT WINAPI WndProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
@@ -77,39 +78,6 @@ void CRenderer::Destroy()
     CleanupDevice();
 }
 
-int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-
-Vector3_t w2s(ViewMatrix_t vm, Vector3_t& in) {
-
-    Vector3_t out;
-
-    out.x = vm[0][0] * in.x + vm[0][1] * in.y + vm[0][2] * in.z + vm[0][3];
-    out.y = vm[1][0] * in.x + vm[1][1] * in.y + vm[1][2] * in.z + vm[1][3];
-
-    float width = vm[3][0] * in.x + vm[3][1] * in.y + vm[3][2] * in.z + vm[3][3];
-
-    if (width < 0.01f) {
-        return out;
-    }
-
-    float inverseWidth = 1.f / width;
-
-    out.x *= inverseWidth;
-    out.y *= inverseWidth;
-
-    float x = screenWidth / 2;
-    float y = screenHeight / 2;
-
-    x += 0.5f * out.x * screenWidth + 0.5f;
-    y -= 0.5f * out.y * screenHeight + 0.5f;
-
-    out.x = x;
-    out.y = y;
-
-    return out;
-}
-
 void CRenderer::Render()
 {
     MSG msg;
@@ -135,20 +103,9 @@ void CRenderer::Render()
 
     ImGui::GetBackgroundDrawList()->AddText({ 10, 10 }, ImColor(255, 0, 0), std::string("Shitware 1337 | FPS: " + std::to_string(ImGui::GetIO().Framerate)).c_str());
 
-    ImDrawList* pBackgroundDrawList = ImGui::GetBackgroundDrawList();
-    
-    // P100 esp
-    if (vars::esp)
-    {
-        for (CEntity entity : sdk::playerList)
-        {
-            if (entity.m_iTeamNum == sdk::localEntity.m_iTeamNum)
-                continue;
+    visuals::RenderVisuals();
 
-            Vector3_t www = w2s(sdk::viewMatrix, entity.m_vOldOrigin);
-            pBackgroundDrawList->AddText({ www.x, www.y }, ImColor(255, 0, 0), "Player");
-        }
-    }
+    ImDrawList* pBackgroundDrawList = ImGui::GetBackgroundDrawList();
 
     ImGui::Render();
     const float clear_color_with_alpha[4] = { 0, 0, 0, 0 };

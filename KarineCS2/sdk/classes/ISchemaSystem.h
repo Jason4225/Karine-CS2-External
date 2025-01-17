@@ -69,4 +69,3 @@ public:
 		return ctx::memory.Read< CUtlTSHash< CSchemaClassBindingBase*, 256, unsigned int > >(uintptr_t(this) + 0x500);
 	};
 };
-

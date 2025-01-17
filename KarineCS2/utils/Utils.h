@@ -3,6 +3,8 @@
 #include <random>
 #include <chrono>
 
+#undef PlaySound
+
 namespace utils
 {
 	inline std::string RandomString(int length)
@@ -22,6 +24,11 @@ namespace utils
 		}
 
 		return result;
+	}
+
+	inline void PlaySound()
+	{
+		//PlaySoundA()
 	}
 }
 

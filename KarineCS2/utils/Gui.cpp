@@ -54,7 +54,7 @@ void gui::DrawMisc()
     if (ImGui::IsItemHovered())
     {
         ImGui::GetForegroundDrawList()->AddRectFilled(ImGui::GetMousePos() + ImVec2(20, 0), ImGui::GetMousePos() + ImVec2(105, 25), ImColor(8, 18, 28, 240), 5);
-        ImGui::GetForegroundDrawList()->AddText(ImGui::GetMousePos() + ImVec2(25, 2.5f), ImColor(255, 255, 255), "Movement");
+        ImGui::GetForegroundDrawList()->AddText(ImGui::GetMousePos() + ImVec2(25, 2.5f), ImColor(255, 255, 255), "Misc");
     }
 
     if (miscTab == 0)
@@ -115,7 +115,7 @@ void gui::DrawMisc()
     }
     else if (miscTab == 1)
     {
-
+        
     }
 }
 
@@ -141,13 +141,26 @@ void gui::DrawVisuals()
         ImGui::GetForegroundDrawList()->AddText(ImGui::GetMousePos() + ImVec2(25, 2.5f), ImColor(255, 255, 255), "World");
     }
 
-    if (miscTab == 0)
+    if (visualsTab == 0)
     {
         ImGui::SetCursorPosY(70);
         ImGui::SetCursorPosX(60);
-        ImGui::Checkbox("Esp", &vars::esp);
+        ImGui::Checkbox("Master switch", &vars::espSwitch);
+        if (vars::espSwitch)
+        {
+            ImGui::SetCursorPosX(60);
+            ImGui::Checkbox("Only spotted", &vars::spotted);
+            ImGui::SetCursorPosX(60);
+            ImGui::Checkbox("Names", &vars::names);
+            ImGui::SetCursorPosX(60);
+            ImGui::Checkbox("Health bar", &vars::healthBar);
+            ImGui::SetCursorPosX(60);
+            ImGui::Checkbox("Boxes", &vars::boxes);
+            ImGui::SetCursorPosX(60);
+            ImGui::Checkbox("Head dot", &vars::headDot);
+        }
     }
-    else if (miscTab == 1)
+    else if (visualsTab == 1)
     {
 
     }

@@ -11,7 +11,7 @@ void CConfig::RefreshConfigs()
 	configs.clear();
 
 	for (auto& entry : std::filesystem::directory_iterator((CONFIG_PATH))) {
-		if (entry.path().extension() == (".sw")) {
+		if (entry.path().extension() == (".hh")) {
 			auto path = entry.path();
 			auto filename = path.filename().string();
 			configs.push_back(filename);
@@ -23,9 +23,24 @@ nlohmann::json CConfig::SaveVars()
 {
 	nlohmann::json data;
 
-	data["visuals"]["esp"] = vars::esp;
+	data["visuals"]["enemies"]["enabled"] = vars::espSwitch;
+	data["visuals"]["enemies"]["boxes"] = vars::boxes;
+	data["visuals"]["enemies"]["names"] = vars::names;
+	data["visuals"]["enemies"]["health"] = vars::healthBar;
+	data["visuals"]["enemies"]["spotted"] = vars::spotted;
+	data["visuals"]["enemies"]["headdot"] = vars::headDot;
 
 	return data;
+}
+
+void CConfig::LoadVars(nlohmann::json& data)
+{
+	vars::espSwitch = data["visuals"]["enemies"]["enabled"];
+	vars::boxes = data["visuals"]["enemies"]["boxes"];
+	vars::names = data["visuals"]["enemies"]["names"];
+	vars::healthBar = data["visuals"]["enemies"]["health"];
+	vars::spotted = data["visuals"]["enemies"]["spotted"];
+	vars::headDot = data["visuals"]["enemies"]["headdot"];
 }
 
 void CConfig::Save(int id)
@@ -43,7 +58,7 @@ void CConfig::Load(int id)
 
 	nlohmann::json data = nlohmann::json::parse(file);
 
-	vars::esp = data["visuals"]["esp"];
+	LoadVars(data);
 
 	file.close();
 }
@@ -56,7 +71,7 @@ void CConfig::Delete(int id)
 
 void CConfig::Create(std::string name)
 {
-	CloseHandle(CreateFileA((CONFIG_PATH + name.append(".sw")).c_str(), GENERIC_READ | GENERIC_WRITE, NULL, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL));
+	CloseHandle(CreateFileA((CONFIG_PATH + name.append(".hh")).c_str(), GENERIC_READ | GENERIC_WRITE, NULL, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL));
 
 	RefreshConfigs();
 

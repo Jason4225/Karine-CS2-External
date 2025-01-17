@@ -6,8 +6,11 @@
 #include "Schema.h"
 #include <FNV1A.h>
 
+// timer for timing :)
 inline static CTimer timer;
 inline static CTimer readTimer;
+
+static const std::vector<int> boneIndexes = { 6 }; // Hardcoded bones cause we only need few of them not all. 6 - Head
 
 bool sdk::Initialize()
 {
@@ -22,7 +25,6 @@ bool sdk::Initialize()
 	char schemaPath[MAX_PATH];
 	GetModuleFileNameExA(ctx::memory.GetHandle(), (HMODULE)schemaSystemDLL, schemaPath, MAX_PATH);
 	uintptr_t schemaSys = reinterpret_cast<uintptr_t>(LoadLibraryExA(schemaPath, NULL, DONT_RESOLVE_DLL_REFERENCES));
-
 
 	PIMAGE_NT_HEADERS ntHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>(reinterpret_cast<std::uint8_t*>(client) + reinterpret_cast<PIMAGE_DOS_HEADER>(client)->e_lfanew);
 
@@ -40,7 +42,6 @@ bool sdk::Initialize()
 
 	ntHeaders = reinterpret_cast<PIMAGE_NT_HEADERS>(reinterpret_cast<std::uint8_t*>(schemaSystemDLL) + reinterpret_cast<PIMAGE_DOS_HEADER>(schemaSystemDLL)->e_lfanew);
 	
-	// @ida: 
 	offsets::schemaSystemInterface = ctx::memory.ResolveRVA(ctx::memory.FindSig({ "\x48\x89\x05\x00\x00\x00\x00\x4C\x8D\x0D\x00\x00\x00\x00\x0F\xB6\x45\x00\x4C\x8D\x45\x00\x33\xF6", "xxx????xxx????xxx?xxx?xx" }, schemaSys, ntHeaders->OptionalHeader.SizeOfImage), 0x3, 0x7) - schemaSys;
 
 	FreeLibrary((HMODULE)client);
@@ -51,19 +52,8 @@ bool sdk::Initialize()
 	// Initialize Schema
 	schemaSystem::Initialize();
 
-	// Initialize rest of the offsets (this should save time since we dont need to loop through whole Schema everytime we want a offset)
-	offsets::m_bPawnIsAlive			= schemaSystem::GetOffset(fnv1a::HashConst("CCSPlayerController->m_bPawnIsAlive"));
-	offsets::m_entitySpottedState	= schemaSystem::GetOffset(fnv1a::HashConst("C_CSPlayerPawn->m_entitySpottedState"));
-	offsets::m_hPawn				= schemaSystem::GetOffset(fnv1a::HashConst("CBasePlayerController->m_hPawn"));
-	offsets::m_iHealth				= schemaSystem::GetOffset(fnv1a::HashConst("C_BaseEntity->m_iHealth"));
-	offsets::m_iTeamNum				= schemaSystem::GetOffset(fnv1a::HashConst("C_BaseEntity->m_iTeamNum"));
-	offsets::m_vOldOrigin			= schemaSystem::GetOffset(fnv1a::HashConst("C_BasePlayerPawn->m_vOldOrigin"));
-	//offsets::m_nTickBase			= schemaSystem::GetOffset(fnv1a::HashConst("CBasePlayerController->m_nTickBase"));
-
 	return true;
 }
-
-uint32_t prevTick = 0;
 
 void sdk::Update()
 {
@@ -73,7 +63,7 @@ void sdk::Update()
 
 		viewMatrix = ctx::memory.Read<ViewMatrix_t>(clientDLL + offsets::dwViewMatrix);
 
-		// Only update every 5 seconds to save da reads.
+		// Only update every 5 seconds to save reads.
 		if (timer.HasElapsed(std::chrono::milliseconds(5000)))
 		{
 			uintptr_t gVars = ctx::memory.Read<uintptr_t>(clientDLL + offsets::dwGlobalVars);
@@ -88,7 +78,6 @@ void sdk::Update()
 		localEntity.m_entitySpottedState = localPawn->GetSpottedState();
 		localEntity.m_vOldOrigin = localPawn->GetOldOrigin();
 		localEntity.m_iTeamNum = localPawn->GetTeamNum();
-		//localEntity.m_nTickBase = localCont->GetTickBase();
 
 		for (int i = 0; i < globalVars.m_nMaxClients; ++i)
 		{
@@ -110,6 +99,16 @@ void sdk::Update()
 			entity.m_entitySpottedState = pawn->GetSpottedState();
 			entity.m_vOldOrigin = pawn->GetOldOrigin();
 			entity.m_iTeamNum = pawn->GetTeamNum();
+			entity.gameSceneNode = pawn->GetGameSceneNode();
+
+			// Get bones
+			static uint32_t m_modelState = schemaSystem::GetOffset(HASH("CSkeletonInstance->m_modelState"));
+			uint64_t boneArray = ctx::memory.Read<uint64_t>(reinterpret_cast<uintptr_t>(entity.gameSceneNode) + m_modelState + 0x80);
+
+			for (int idx : boneIndexes)
+			{
+				entity.boneArray.insert(std::make_pair(idx, ctx::memory.Read<Vector3_t>(boneArray + (idx * 32))));
+			}
 
 			entities.push_back(entity);
 		}
@@ -117,8 +116,10 @@ void sdk::Update()
 		printf("RPS: %i\n", ctx::memory.reads);
 		ctx::memory.reads = 0;
 
+		std::lock_guard<std::mutex> lock(entityMutex);
 		playerList.clear();
 		playerList.assign(entities.begin(), entities.end());
+
 		Sleep(1);
 	}
 }

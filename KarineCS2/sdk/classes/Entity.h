@@ -8,9 +8,25 @@
 #include "../Schema.h"
 
 #include <FNV1A.h>
+#include <unordered_map>
+
+// Hardcoded bones cause why not
+enum EBones
+{
+	HEAD = 6
+};
 
 // https://github.com/perilouswithadollarsign/cstrike15_src
 // https://github.com/neverlosecc/source2sdk/blob/cs2/sdk/client.hpp
+
+class CModelState;
+class CGameSceneNode;
+
+struct BoneData_t
+{
+	Vector3_t position;
+	char pad[0x14];
+};
 
 struct EntitySpottedState_t
 {
@@ -40,18 +56,22 @@ public:
 class C_BaseEntity : public CEntityInstance
 {
 public:
-	// client::CGameSceneNode* m_pGameSceneNode
-	// uint32_t m_fFlags
-	// Vector m_vecAbsVelocity
+	CGameSceneNode* GetGameSceneNode()
+	{
+		static uintptr_t offset = schemaSystem::GetOffset(HASH("C_BaseEntity->m_pGameSceneNode"));
+		return ctx::memory.Read<CGameSceneNode*>(reinterpret_cast<uintptr_t>(this) + offset);
+	}
 
 	uint8_t GetTeamNum()
 	{
-		return ctx::memory.Read<uint8_t>((uintptr_t)this + offsets::m_iTeamNum);
+		static uintptr_t offset = schemaSystem::GetOffset(HASH("C_BaseEntity->m_iTeamNum"));
+		return ctx::memory.Read<uint8_t>(reinterpret_cast<uintptr_t>(this) + offset);
 	}
 
 	int GetHealth()
 	{
-		return ctx::memory.Read<int>((uintptr_t)this + offsets::m_iHealth);
+		static uintptr_t offset = schemaSystem::GetOffset(HASH("C_BaseEntity->m_iHealth"));
+		return ctx::memory.Read<int>(reinterpret_cast<uintptr_t>(this) + offset);
 	}
 };
 
@@ -61,20 +81,14 @@ class CBasePlayerController : public C_BaseEntity
 public:
 	uint32_t GetTickBase()
 	{
-		return ctx::memory.Read<uint32_t>((uintptr_t)this + schemaSystem::GetOffset(HASH("CBasePlayerController->m_nTickBase")));
+		static uintptr_t offset = schemaSystem::GetOffset(HASH("CBasePlayerController->m_nTickBase"));
+		return ctx::memory.Read<uint32_t>(reinterpret_cast<uintptr_t>(this) + offset);
 	}
 	
 	CBaseHandle GetPawnHandle()
 	{
-		return ctx::memory.Read<CBaseHandle>((uintptr_t)this + offsets::m_hPawn);
-	}
-
-	/*
-	* Not used its more efficient to use offsets for localplayer.
-	*/
-	bool IsLocalPlayerController()
-	{
-		return ctx::memory.Read<bool>((uintptr_t)this + schemaSystem::GetOffset(HASH("CBasePlayerController->m_bIsLocalPlayerController")));
+		static uintptr_t offset = schemaSystem::GetOffset(HASH("CBasePlayerController->m_hPawn"));
+		return ctx::memory.Read<CBaseHandle>(reinterpret_cast<uintptr_t>(this) + offset);
 	}
 };
 
@@ -82,9 +96,11 @@ class CCSPlayerController : public CBasePlayerController
 {
 public:
 	// CUtlString m_sSanitizedPlayerName
+
 	bool IsPawnAlive()
 	{
-		return ctx::memory.Read<bool>((uintptr_t)this + offsets::m_bPawnIsAlive);
+		static uintptr_t offset = schemaSystem::GetOffset(HASH("CCSPlayerController->m_bPawnIsAlive"));
+		return ctx::memory.Read<bool>(reinterpret_cast<uintptr_t>(this) + offset);
 	}
 };
 
@@ -94,7 +110,8 @@ public:
 	// float m_flMouseSensitivity
 	Vector3_t GetOldOrigin()
 	{
-		return ctx::memory.Read<Vector3_t>((uintptr_t)this + offsets::m_vOldOrigin);
+		static uintptr_t offset = schemaSystem::GetOffset(HASH("C_BasePlayerPawn->m_vOldOrigin"));
+		return ctx::memory.Read<Vector3_t>(reinterpret_cast<uintptr_t>(this) + offset);
 	}
 };
 
@@ -109,8 +126,10 @@ class C_CSPlayerPawn : public C_CSPlayerPawnBase
 public:
 	EntitySpottedState_t GetSpottedState()
 	{
-		return ctx::memory.Read<EntitySpottedState_t>((uintptr_t)this + offsets::m_entitySpottedState);
+		static uintptr_t offset = schemaSystem::GetOffset(HASH("C_CSPlayerPawn->m_entitySpottedState"));
+		return ctx::memory.Read<EntitySpottedState_t>(reinterpret_cast<uintptr_t>(this) + offset);
 	}
+
 	// bool m_bIsScoped;
 	// bool m_bIsDefusing
 };
@@ -123,4 +142,6 @@ public:
 	Vector3_t m_vOldOrigin;
 	uint8_t m_iTeamNum;
 	uint32_t m_nTickBase;
+	CGameSceneNode* gameSceneNode;
+	std::unordered_map<int, Vector3_t> boneArray;
 };
